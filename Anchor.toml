@@ -11,8 +11,11 @@ storage_program = "AxvHNpUZDvuuPXaAzm6oUqx4zb68PVWCaMVxqZdbbgn5"
 [registry]
 url = "https://api.apr.dev"
 
+[test.validator]
+url = "https://api.mainnet-beta.solana.com"
+
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
