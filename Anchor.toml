@@ -6,16 +6,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-storage_program = "AxvHNpUZDvuuPXaAzm6oUqx4zb68PVWCaMVxqZdbbgn5"
+mappings = "3V4vPYRYFFxwXr3tobVZ9FnAc3XxnE4egdHH7E8WeZU3"
 
 [registry]
 url = "https://api.apr.dev"
 
-[test.validator]
-url = "https://api.mainnet-beta.solana.com"
-
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

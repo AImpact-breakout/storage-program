@@ -1,62 +1,56 @@
 use anchor_lang::prelude::*;
-
-declare_id!("AxvHNpUZDvuuPXaAzm6oUqx4zb68PVWCaMVxqZdbbgn5");
+use std::mem::size_of;
+declare_id!("6ytMmvJR2YYsuPR7FSQUQnb7UGi1rf36BrXzZUNvKsnj");
 
 #[program]
-pub mod storage_program {
-    use std::ops::DerefMut;
-
+pub mod mappings {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialise>) -> Result<()> {
-        let storage = ctx.accounts.storage.deref_mut();
-        let entries: Vec<StorageEntry> = Vec::new();
-
-        *storage = Storage { storage: entries };
-
+    pub fn initialize(ctx: Context<Initialize>, domain: u64, key: u64) -> Result<()> {
         Ok(())
     }
 
-    pub fn set_value(ctx: Context<SetKey>, key: Vec<u8>, value: Vec<u8>) -> Result<()> {
-        let storage = ctx.accounts.storage.deref_mut();
-        if let Some(entry) = storage
-            .storage
-            .iter_mut()
-            .find(|storage_item| storage_item.key == key)
-        {
-            entry.value = value;
-        } else {
-            storage.storage.push(StorageEntry { key, value });
-        }
+    pub fn set(ctx: Context<Set>, domain: u64, key: u64, value: u64) -> Result<()> {
+        ctx.accounts.val.value = value;
+        Ok(())
+    }
 
-        return Ok(());
+    pub fn get(ctx: Context<Get>, domain: u64, key: u64) -> Result<u64> {
+        Ok(ctx.accounts.val.value)
     }
 }
 
 #[derive(Accounts)]
-pub struct Initialise<'info> {
+#[instruction(domain: u64, key: u64)]
+pub struct Initialize<'info> {
+
+    #[account(init,
+              payer = signer,
+              space = size_of::<Val>() + 8,
+              seeds=[&domain.to_le_bytes().as_ref(), &key.to_le_bytes().as_ref()],
+              bump)]
+    val: Account<'info, Val>,
+    
     #[account(mut)]
-    pub authority: Signer<'info>,
-
-    #[account(init, payer = authority, space = 64, seeds = [b"storage".as_ref()], bump)]
-    pub storage: Account<'info, Storage>,
-
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct StorageEntry {
-    key: Vec<u8>,
-    value: Vec<u8>,
+    signer: Signer<'info>,
+    
+    system_program: Program<'info, System>,
 }
 
 #[account]
-pub struct Storage {
-    storage: Vec<StorageEntry>,
+pub struct Val {
+    value: u64,
 }
 
 #[derive(Accounts)]
-pub struct SetKey<'info> {
-    #[account(mut, seeds = [b"storage".as_ref()], bump)]
-    pub storage: Account<'info, Storage>,
+#[instruction(domain: u64, key: u64)]
+pub struct Set<'info> {
+    #[account(mut)]
+    val: Account<'info, Val>,
+}
+
+#[derive(Accounts)]
+#[instruction(domain: u64, key: u64)]
+pub struct Get<'info> {
+    val: Account<'info, Val>,
 }
